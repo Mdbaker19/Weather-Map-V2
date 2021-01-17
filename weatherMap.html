@@ -18,11 +18,25 @@
 <body>
 
 <div id="header">
-    <select>
+    <select id="weatherDisplay">
+        <option value="" disabled selected>Select Weather Output</option>
         <option value="current">Current Weather</option>
         <option value="daily">One Week Forecast</option>
         <option value="hourly">Hourly</option>
     </select>
+
+    <div class="inputContainer" id="nameInput">
+        <input id="search" autocomplete="off" required>
+        <label for="search" class="labels">
+            <span class="labelContent">Search</span>
+        </label>
+        <button id="searchSubmit"><i class="fas fa-search"></i></button>
+    </div>
+
+    <p id="time"></p>
+
+    <p id="currentAddress"></p>
+
     <button id="darkLight"><i class="fas fa-sun"></i></button>
 </div>
 

@@ -6,9 +6,12 @@ $(document).ready(function (){
     let count = 0;
 
     const moon = "<i class=\"fas fa-moon\"></i>";
+    const sun = "<i class=\"fas fa-sun\"></i>";
 
     const lightModeMap = "mapbox://styles/mapbox/streets-v11";
     const darkModeMap = "mapbox://styles/mapbox/dark-v10";
+
+    const input = $("#search");
 
     let latLon = [-98.43, 29.42];
     let weatherArea = document.getElementById("weatherArea");
@@ -18,6 +21,8 @@ $(document).ready(function (){
         fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&exclude=hourly,minutely&units=imperial&appid=${openWeatherApi}`).then( r => {
             r.json().then(data => {
                 $("#weatherArea").html(fullForecast(data.daily, data));
+                $("#time").text(clockTime(data.daily[0].dt));
+                getLocation({lng:lng, lat:lat});
                 getImage(data.daily[0].weather[0].main);
                 console.log(data);
             });
@@ -31,7 +36,7 @@ $(document).ready(function (){
         container: 'map',
         style: darkModeMap,
         center: [-98.43, 29.42],
-        zoom: 9
+        zoom: 8
     });
 
     let initialMarker = {
@@ -101,20 +106,22 @@ $(document).ready(function (){
     $("#darkLight").on("click", () => {
         count++;
         if(count % 2 === 1) {
+            $("#darkLight").html(moon);
             lightModeStyle();
             map = new mapboxgl.Map({
                 container: 'map',
                 style: lightModeMap,
                 center: latLon,
-                zoom: 9
+                zoom: 8
             });
         } else {
+            $("#darkLight").html(sun);
             darkModeStyle();
             map = new mapboxgl.Map({
                 container: 'map',
                 style: darkModeMap,
                 center: latLon,
-                zoom: 9
+                zoom: 8
             });
         }
         marker = new mapboxgl.Marker(initialMarker)
@@ -125,10 +132,47 @@ $(document).ready(function (){
 
 
     function lightModeStyle(){
-
+        console.log("switch to light mode");
     }
     function darkModeStyle(){
+        console.log("switch to dark mode");
+    }
 
+
+    $("#weatherDisplay").on("change", () => {
+        let choice = $("#weatherDisplay").val();
+        if(choice === "current"){
+
+        } else if(choice === "daily"){
+
+        } else if(choice === "hourly"){
+
+        }
+    });
+
+    function callSearch(input){
+        geocode(input, mapboxToken).then(r => {
+            latLon = r;
+            marker.setLngLat(r);
+            mapFly(latLon);
+            getWeather(r[0], r[1]);
+        });
+    }
+
+    $("#searchSubmit").on("click", () => {
+        if(input.val().length > 0) callSearch(input.val());
+    });
+    window.addEventListener("keydown", (e) => {
+        if(e.key === "Enter" && input.val().length > 0) callSearch(input.val());
+    });
+
+    function mapFly(coords){
+        map.flyTo({
+           center: coords,
+           zoom: 10,
+           speed: 0.6,
+           curve: 3
+        });
     }
 
 
@@ -141,12 +185,11 @@ $(document).ready(function (){
 
 
 
-
-
-
-
-
-
+    function getLocation(obj){
+        reverseGeocode(obj, mapboxToken).then(r => {
+            $("#currentAddress").text(r);
+        });
+    }
 
 
 
@@ -155,7 +198,7 @@ $(document).ready(function (){
             case "Clear":
                 body.style.backgroundImage = "url('img/sun.jpg')";
                 body.style.backgroundColor = "#48aff2";
-                weatherArea.style.color = "white";
+                weatherArea.style.color = "#342f2f";
                 break;
             case "Clouds":
                 body.style.backgroundImage = "url('img/cloudy.jpg')";
@@ -170,9 +213,32 @@ $(document).ready(function (){
             case "Snow":
                 body.style.backgroundImage = "url('img/snow.jpg')";
                 body.style.backgroundColor = "rgb(242 243 246)";
-                weatherArea.style.color = "white";
+                weatherArea.style.color = "#342f2f";
                 break;
         }
+    }
+
+    function geocode(search, token) {
+        const baseUrl = 'https://api.mapbox.com';
+        const endPoint = '/geocoding/v5/mapbox.places/';
+        return fetch(baseUrl + endPoint + encodeURIComponent(search) + '.json' + "?" + 'access_token=' + token)
+            .then(function(res) {
+                return res.json();
+            }).then(function(data) {
+                return data.features[0].center;
+            });
+    }
+
+    function reverseGeocode(coordinates, token) {
+        const baseUrl = 'https://api.mapbox.com';
+        const endPoint = '/geocoding/v5/mapbox.places/';
+        return fetch(baseUrl + endPoint + coordinates.lng + "," + coordinates.lat + '.json' + "?" + 'access_token=' + token)
+            .then(function(res) {
+                return res.json();
+            })
+            .then(function(data) {
+                return data.features[1].place_name;
+            });
     }
 
     const cap = (string) =>{let sArr = string.split(" ");if(sArr.length > 1) {return sArr[0].charAt(0).toUpperCase() + sArr[0].substring(1) + " " + sArr[1].charAt(0).toUpperCase() + sArr[1].substring(1);}return sArr[0].charAt(0).toUpperCase() + sArr[0].substring(1);}
