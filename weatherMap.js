@@ -1,8 +1,14 @@
 $(document).ready(function (){
+    const cap = (string) =>{let sArr = string.split(" ");if(sArr.length > 1) {return sArr[0].charAt(0).toUpperCase() + sArr[0].substring(1) + " " + sArr[1].charAt(0).toUpperCase() + sArr[1].substring(1);}return sArr[0].charAt(0).toUpperCase() + sArr[0].substring(1);}
+    const windDir = (d) =>{d += 22.5;if (d < 0) d = 360 - Math.abs(d) % 360; else d = d % 360;let w = parseInt(d / 45);return `${directions[w]}`;}
+    const clockTime = (unix) =>{let date = new Date(unix * 1000);let hours = date.getHours();let minutes = "0" + date.getMinutes();let seconds = "0" + date.getSeconds();return `${hours}:${minutes.substr(-2)}:${seconds.substr(-2)}`;}
+    const weekDay = (unix) =>{let d = new Date(unix * 1000);let day = d.getDay();return `${days[day]}`;}
+    const timeConverter = (unix) =>{let d = new Date(unix * 1000);let year = d.getFullYear();let month = d.getMonth();let m = months[month];let day = d.getDate();return `${day} ${m} ${year}`;}
 
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
+    const baseOffset = 21600;
     let count = 0;
 
     let usingCurrent = false;
@@ -23,11 +29,18 @@ $(document).ready(function (){
     let weatherArea = document.getElementById("weatherArea");
     let body = document.querySelector("body");
 
+    const currTime = new Date();
+    const it = currTime.getTime()
+    console.log(clockTime(it + baseOffset))
+
+    // console.log(currTime.toLocaleTimeString()); // 736pm
+    // console.log(currTime.toString().substring(0, 24));
+
     function getWeather(lng, lat){
         fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&exclude=hourly,minutely&units=imperial&appid=${openWeatherApi}`).then( r => {
             r.json().then(data => {
                 $("#weatherArea").html(fullForecast(data.daily, data));
-                $("#time").text(clockTime(data.current.dt));
+                $("#time").text(clockTime(data.current.dt + data.timezone_offset + baseOffset));
                 getLocation({lng:lng, lat:lat});
                 getImage(data.daily[0].weather[0].main);
                 console.log(data);
@@ -36,10 +49,10 @@ $(document).ready(function (){
     }
 
     function weatherHourly(lng, lat){
-        fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&exclude=daily,current,minutely&units=imperial&appid=${openWeatherApi}`).then( r => {
+        fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&exclude=daily,minutely&units=imperial&appid=${openWeatherApi}`).then( r => {
             r.json().then(data => {
                 $("#weatherArea").html(twentyFourHourForecast(data.hourly, data));
-                $("#time").text(clockTime(data.hourly[0].dt));
+                $("#time").text(clockTime(data.current.dt + data.timezone_offset + baseOffset));
                 getLocation({lng:lng, lat:lat});
                 getImage(data.hourly[0].weather[0].main);
                 console.log(data);
@@ -51,7 +64,7 @@ $(document).ready(function (){
         fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&exclude=daily,hourly,minutely&units=imperial&appid=${openWeatherApi}`).then( r => {
             r.json().then(data => {
                 $("#weatherArea").html(currentWeatherOnly(data.current, data));
-                $("#time").text(clockTime(data.current.dt));
+                $("#time").text(clockTime(data.current.dt + data.timezone_offset + baseOffset));
                 getLocation({lng:lng, lat:lat});
                 getImage(data.current.weather[0].main);
                 console.log(data);
@@ -71,7 +84,7 @@ $(document).ready(function (){
 
     let initialMarker = {
         draggable: true,
-        color: "#FF8552"
+        color: "#4fb286"
     }
 
     let marker = new mapboxgl.Marker(initialMarker)
@@ -139,13 +152,16 @@ $(document).ready(function (){
         return `<div class="weatherCard" id="singleWeatherCard">
                     <img src="http://openweathermap.org/img/wn/${currObj.weather[0].icon}.png" alt="icon">
                     <p class="weekday">${weekDay(currObj.dt)}</p>
-                    <p class="head">${clockTime(currObj.dt + obj.timezone_offset)}</p>
+                    <p class="head">${clockTime(currObj.dt + obj.timezone_offset + baseOffset)}</p>
                     <p class="content">Feels like : ${currObj.feels_like} ˚</p>
                     <p class="content">Weather : ${cap(currObj.weather[0].description)}</p>
+                    <p class="content">Sunrise : ${clockTime(currObj.sunrise)}</p>
+                    <p class="content">Sunset : ${clockTime(currObj.sunset)}</p>
                     <p class="content">Wind speed : ${currObj.wind_speed} mph</p>
                     <p class="content">Wind direction : ${windDir(currObj.wind_deg)}</p>
                     <p class="content">High : ${currObj.temp}˚</p>
                     <p class="content">Humidity : ${currObj.humidity}</p>
+                    <p class="content">UVI : ${currObj.uvi}</p>
                 </div>`;
     }
 
@@ -234,16 +250,25 @@ $(document).ready(function (){
             usingCurrent = true;
             usingHourly = false;
             usingWeekly = false;
+            $("#weatherArea").css("overflow", "hidden");
             weatherCurrent(latLon[0], latLon[1]);
         } else if(choice === "daily"){
             usingCurrent = false;
             usingHourly = false;
             usingWeekly = true;
+            $("#weatherArea").css({
+                "overflow": "scroll",
+                "overflow-x": "hidden"
+            });
             getWeather(latLon[0], latLon[1]);
         } else if(choice === "hourly"){
             usingCurrent = false;
             usingHourly = true;
             usingWeekly = false;
+            $("#weatherArea").css({
+                "overflow": "scroll",
+                "overflow-x": "hidden"
+            });
             weatherHourly(latLon[0], latLon[1]);
         }
     });
@@ -285,6 +310,15 @@ $(document).ready(function (){
     /*
     *  DARK MODE / LIGHT MODE COLORS
     *  NAV STYLING AND LAYOUT IN NON MOBILE
+    *  COULD MEMOIZE WITH A CACHE
+    *
+    *  HAVE THE HOURLY FORECAST START FROM THE CURRENT HOUR ON WARD ( GET DATE() AND COMPARE DT GET THAT INDEX AND RENDER FROM THERE ON )
+    *
+    *  CHANGE LOCATION BUTTON TO DISPLAY THE MAP, POSSIBLE FLIP CARDS ON HOVER
+    *
+    *  LARGER CURRENT WEATHER DISPLAYED
+    *
+    *  IF CURRENT TIME AFTER CURRENT SUNSET THEN NIGHT MODE (?)
     *
     * */
 
@@ -350,9 +384,4 @@ $(document).ready(function (){
             });
     }
 
-    const cap = (string) =>{let sArr = string.split(" ");if(sArr.length > 1) {return sArr[0].charAt(0).toUpperCase() + sArr[0].substring(1) + " " + sArr[1].charAt(0).toUpperCase() + sArr[1].substring(1);}return sArr[0].charAt(0).toUpperCase() + sArr[0].substring(1);}
-    const windDir = (d) =>{d += 22.5;if (d < 0) d = 360 - Math.abs(d) % 360; else d = d % 360;let w = parseInt(d / 45);return `${directions[w]}`;}
-    const clockTime = (unix) =>{let date = new Date(unix * 1000);let hours = date.getHours();let minutes = "0" + date.getMinutes();let seconds = "0" + date.getSeconds();return `${hours}:${minutes.substr(-2)}:${seconds.substr(-2)}`;}
-    const weekDay = (unix) =>{let d = new Date(unix * 1000);let day = d.getDay();return `${days[day]}`;}
-    const timeConverter = (unix) =>{let d = new Date(unix * 1000);let year = d.getFullYear();let month = d.getMonth();let m = months[month];let day = d.getDate();return `${day} ${m} ${year}`;}
 });
