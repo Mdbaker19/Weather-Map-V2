@@ -1,9 +1,11 @@
 $(document).ready(function (){
     const cap = (string) =>{let sArr = string.split(" ");if(sArr.length > 1) {return sArr[0].charAt(0).toUpperCase() + sArr[0].substring(1) + " " + sArr[1].charAt(0).toUpperCase() + sArr[1].substring(1);}return sArr[0].charAt(0).toUpperCase() + sArr[0].substring(1);}
     const windDir = (d) =>{d += 22.5;if (d < 0) d = 360 - Math.abs(d) % 360; else d = d % 360;let w = parseInt(d / 45);return `${directions[w]}`;}
-    const clockTime = (unix) =>{let date = new Date(unix * 1000);let hours = date.getHours();let minutes = "0" + date.getMinutes();let seconds = "0" + date.getSeconds();return `${hours}:${minutes.substr(-2)}:${seconds.substr(-2)}`;}
+    const clockTime = (unix) =>{let date = new Date(unix * 1000);let hours = date.getHours();let minutes = "0" + date.getMinutes();let seconds = "0" + date.getSeconds();return `${hours} : ${minutes.substr(-2)} : ${seconds.substr(-2)}`;}
     const weekDay = (unix) =>{let d = new Date(unix * 1000);let day = d.getDay();return `${days[day]}`;}
     const timeConverter = (unix) =>{let d = new Date(unix * 1000);let year = d.getFullYear();let month = d.getMonth();let m = months[month];let day = d.getDate();return `${day} ${m} ${year}`;}
+    const geocode = (search, token) => {const baseUrl = 'https://api.mapbox.com';const endPoint = '/geocoding/v5/mapbox.places/';return fetch(baseUrl + endPoint + encodeURIComponent(search) + '.json' + "?" + 'access_token=' + token).then(function(res) {return res.json();}).then(function(data) {return data.features[0].center;});}
+    const reverseGeocode = (coordinates, token) => {const baseUrl = 'https://api.mapbox.com';const endPoint = '/geocoding/v5/mapbox.places/';return fetch(baseUrl + endPoint + coordinates.lng + "," + coordinates.lat + '.json' + "?" + 'access_token=' + token).then(function(res) {return res.json();}).then(function(data) {return data.features[1].place_name;});}
 
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -11,7 +13,6 @@ $(document).ready(function (){
     const baseOffset = 21600;
     let count = 0;
 
-    let usingCurrent = false;
     let usingWeekly = true;
     let usingHourly = false;
 
@@ -40,9 +41,7 @@ $(document).ready(function (){
         fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&exclude=hourly,minutely&units=imperial&appid=${openWeatherApi}`).then( r => {
             r.json().then(data => {
                 $("#weatherArea").html(fullForecast(data.daily, data));
-                $("#time").text(clockTime(data.current.dt + data.timezone_offset + baseOffset));
-                getLocation({lng:lng, lat:lat});
-                getImage(data.daily[0].weather[0].main);
+                displayOtherInfo(data, lng, lat);
                 console.log(data);
             });
         });
@@ -52,25 +51,19 @@ $(document).ready(function (){
         fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&exclude=daily,minutely&units=imperial&appid=${openWeatherApi}`).then( r => {
             r.json().then(data => {
                 $("#weatherArea").html(twentyFourHourForecast(data.hourly, data));
-                $("#time").text(clockTime(data.current.dt + data.timezone_offset + baseOffset));
-                getLocation({lng:lng, lat:lat});
-                getImage(data.hourly[0].weather[0].main);
+                displayOtherInfo(data, lng, lat);
                 console.log(data);
             });
         });
     }
 
-    function weatherCurrent(lng, lat){
-        fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&exclude=daily,hourly,minutely&units=imperial&appid=${openWeatherApi}`).then( r => {
-            r.json().then(data => {
-                $("#weatherArea").html(currentWeatherOnly(data.current, data));
-                $("#time").text(clockTime(data.current.dt + data.timezone_offset + baseOffset));
-                getLocation({lng:lng, lat:lat});
-                getImage(data.current.weather[0].main);
-                console.log(data);
-            });
-        });
+    function displayOtherInfo(data, lng, lat){
+        $("#currWeatherArea").html(currentWeatherOnly(data.current, data));
+        getLocation({lng:lng, lat:lat});
+        getImage(data.current.weather[0].main);
+        $("#time").text(clockTime(data.current.dt + data.timezone_offset + baseOffset));
     }
+
 
     getWeather(latLon[0], latLon[1]);
 
@@ -102,8 +95,6 @@ $(document).ready(function (){
         latLon = [position.lng, position.lat];
         if(usingWeekly) {
             getWeather(position.lng, position.lat);
-        } else if(usingCurrent){
-            weatherCurrent(position.lng, position.lat);
         } else if(usingHourly){
             weatherHourly(position.lng, position.lat);
         }
@@ -122,8 +113,6 @@ $(document).ready(function (){
         marker.setLngLat(latLon);
         if(usingWeekly) {
             getWeather(latLon[0], latLon[1]);
-        } else if(usingCurrent){
-            currentWeatherOnly(latLon[0], latLon[1]);
         } else if(usingHourly){
             weatherHourly(latLon[0], latLon[1]);
         }
@@ -139,8 +128,8 @@ $(document).ready(function (){
                     <p class="weekday">${weekDay(data.dt)}</p>
                     <p class="head">${timeConverter(data.dt + parentDataSet.timezone_offset)}</p>
                     <p class="content">Feels like : ${data.temp.day} ˚</p>
-                    <p class="content">Weather : ${cap(data.weather[0].description)}</p>
-                    <p class="content">Wind speed : ${data.wind_speed} mph</p>
+<!--                    <p class="content">Weather : ${cap(data.weather[0].description)}</p>-->
+<!--                    <p class="content">Wind speed : ${data.wind_speed} mph</p>-->
                     <p class="content">Wind direction : ${windDir(data.wind_deg)}</p>
                     <p class="content">High : ${data.temp.max}˚</p>
                     <p class="content">Min : ${data.temp.min}˚</p>
@@ -149,19 +138,23 @@ $(document).ready(function (){
     }
 
     function currentWeatherOnly(currObj, obj){
-        return `<div class="weatherCard" id="singleWeatherCard">
-                    <img src="http://openweathermap.org/img/wn/${currObj.weather[0].icon}.png" alt="icon">
-                    <p class="weekday">${weekDay(currObj.dt)}</p>
-                    <p class="head">${clockTime(currObj.dt + obj.timezone_offset + baseOffset)}</p>
-                    <p class="content">Feels like : ${currObj.feels_like} ˚</p>
-                    <p class="content">Weather : ${cap(currObj.weather[0].description)}</p>
-                    <p class="content">Sunrise : ${clockTime(currObj.sunrise)}</p>
-                    <p class="content">Sunset : ${clockTime(currObj.sunset)}</p>
-                    <p class="content">Wind speed : ${currObj.wind_speed} mph</p>
-                    <p class="content">Wind direction : ${windDir(currObj.wind_deg)}</p>
-                    <p class="content">High : ${currObj.temp}˚</p>
-                    <p class="content">Humidity : ${currObj.humidity}</p>
-                    <p class="content">UVI : ${currObj.uvi}</p>
+        return `<div class="weatherCard" id="singleCurrCard">
+                    <div id="mainInfo">
+                        <img src="http://openweathermap.org/img/wn/${currObj.weather[0].icon}.png" alt="icon">
+                        <p class="weekday">${weekDay(currObj.dt)}</p>
+                        <p class="head">${clockTime(currObj.dt + obj.timezone_offset + baseOffset)}</p>
+                        <p class="content">Feels like : ${currObj.feels_like} ˚</p>
+                    </div>
+                    <div id="extraInfo">
+                        <p class="content">Weather : ${cap(currObj.weather[0].description)}</p>
+                        <p class="content">Sunrise : ${clockTime(currObj.sunrise)}</p>
+                        <p class="content">Sunset : ${clockTime(currObj.sunset)}</p>
+                        <p class="content">Wind speed : ${currObj.wind_speed} mph</p>
+                        <p class="content">Wind direction : ${windDir(currObj.wind_deg)}</p>
+                        <p class="content">High : ${currObj.temp}˚</p>
+                        <p class="content">Humidity : ${currObj.humidity}</p>
+                        <p class="content">UVI : ${currObj.uvi}</p>
+                    </div>
                 </div>`;
     }
 
@@ -181,7 +174,7 @@ $(document).ready(function (){
 
     function fullForecast(arr, obj){
         let html = "";
-        for(let i = 0; i < arr.length; i++){
+        for(let i = 1; i < arr.length; i++){
             html += render(arr[i], obj);
         }
         return html;
@@ -246,14 +239,7 @@ $(document).ready(function (){
 
     $("#weatherDisplay").on("change", () => {
         let choice = $("#weatherDisplay").val();
-        if(choice === "current"){
-            usingCurrent = true;
-            usingHourly = false;
-            usingWeekly = false;
-            $("#weatherArea").css("overflow", "hidden");
-            weatherCurrent(latLon[0], latLon[1]);
-        } else if(choice === "daily"){
-            usingCurrent = false;
+        if(choice === "daily"){
             usingHourly = false;
             usingWeekly = true;
             $("#weatherArea").css({
@@ -262,7 +248,6 @@ $(document).ready(function (){
             });
             getWeather(latLon[0], latLon[1]);
         } else if(choice === "hourly"){
-            usingCurrent = false;
             usingHourly = true;
             usingWeekly = false;
             $("#weatherArea").css({
@@ -280,8 +265,6 @@ $(document).ready(function (){
             mapFly(latLon);
             if(usingWeekly) {
                 getWeather(latLon[0], latLon[1]);
-            } else if(usingCurrent){
-                currentWeatherOnly(latLon[0], latLon[1]);
             } else if(usingHourly){
                 weatherHourly(latLon[0], latLon[1]);
             }
@@ -334,54 +317,27 @@ $(document).ready(function (){
         });
     }
 
-
-
     function getImage(condition){
         switch (condition){
             case "Clear":
                 body.style.backgroundImage = "url('img/sun.jpg')";
-                body.style.backgroundColor = "#48aff2";
                 weatherArea.style.color = "#4fb286";
                 break;
             case "Clouds":
                 body.style.backgroundImage = "url('img/cloudy.jpg')";
-                body.style.backgroundColor = "rgb(111 121 130)";
                 weatherArea.style.color = "white";
+                $("#singleCurrCard").css("color", "black");
                 break;
             case "Rain":
                 body.style.backgroundImage = "url('img/rainy.jpg')";
-                body.style.backgroundColor = "rgb(63 90 142)";
                 weatherArea.style.color = "white";
                 break;
             case "Snow":
                 body.style.backgroundImage = "url('img/snow.jpg')";
-                body.style.backgroundColor = "rgb(242 243 246)";
                 weatherArea.style.color = "rgb(247 247 247)";
                 break;
         }
     }
 
-    function geocode(search, token) {
-        const baseUrl = 'https://api.mapbox.com';
-        const endPoint = '/geocoding/v5/mapbox.places/';
-        return fetch(baseUrl + endPoint + encodeURIComponent(search) + '.json' + "?" + 'access_token=' + token)
-            .then(function(res) {
-                return res.json();
-            }).then(function(data) {
-                return data.features[0].center;
-            });
-    }
-
-    function reverseGeocode(coordinates, token) {
-        const baseUrl = 'https://api.mapbox.com';
-        const endPoint = '/geocoding/v5/mapbox.places/';
-        return fetch(baseUrl + endPoint + coordinates.lng + "," + coordinates.lat + '.json' + "?" + 'access_token=' + token)
-            .then(function(res) {
-                return res.json();
-            })
-            .then(function(data) {
-                return data.features[1].place_name;
-            });
-    }
 
 });
