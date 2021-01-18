@@ -38,7 +38,7 @@ $(document).ready(function (){
     function weatherHourly(lng, lat){
         fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&exclude=daily,current,minutely&units=imperial&appid=${openWeatherApi}`).then( r => {
             r.json().then(data => {
-                $("#weatherArea").html(twelveHourForecast(data.hourly, data));
+                $("#weatherArea").html(twentyFourHourForecast(data.hourly, data));
                 $("#time").text(clockTime(data.hourly[0].dt));
                 getLocation({lng:lng, lat:lat});
                 getImage(data.hourly[0].weather[0].main);
@@ -171,9 +171,9 @@ $(document).ready(function (){
         return html;
     }
 
-    function twelveHourForecast(arr, obj){
+    function twentyFourHourForecast(arr, obj){
         let html = "";
-        for(let i = 0; i < 12; i++){
+        for(let i = 0; i < 25; i++){
             html += renderHourly(arr[i], obj);
         }
         return html;
@@ -281,7 +281,12 @@ $(document).ready(function (){
 
 
 
-
+// NEED TO FINISH:
+    /*
+    *  DARK MODE / LIGHT MODE COLORS
+    *  NAV STYLING AND LAYOUT IN NON MOBILE
+    *
+    * */
 
 
 
@@ -317,7 +322,7 @@ $(document).ready(function (){
             case "Snow":
                 body.style.backgroundImage = "url('img/snow.jpg')";
                 body.style.backgroundColor = "rgb(242 243 246)";
-                weatherArea.style.color = "#342f2f";
+                weatherArea.style.color = "rgb(247 247 247)";
                 break;
         }
     }
