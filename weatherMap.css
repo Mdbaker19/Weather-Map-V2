@@ -95,6 +95,9 @@ button:hover{
     margin: auto;
     flex-wrap: wrap;
 }
+.frontData{
+    font-size: 22px;
+}
 #weatherArea::-webkit-scrollbar-track{
     background: #7b7272;
 }
@@ -106,16 +109,20 @@ button:hover{
 }
 #map{
     width: 95%;
-    height: 30vh;
+    height: 45%;
     margin: auto;
     opacity: .93;
 }
 #mapAndCurr{
     display: flex;
-    height: 40vh;
+    height: 55vh;
+    flex-direction: column;
 }
 #currWeatherArea{
-    display: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 55%;
 }
 .weatherCard{
     width: 80%;
@@ -133,20 +140,36 @@ button:hover{
     color: #4fb286;
 }
 .weatherCardCopy{
-    width: 80%;
-    height: 96%;
+    width: 95%;
+    height: 95%;
     display: flex;
-    flex-direction: column;
     justify-content: space-around;
     padding: 5px;
-    border: 1px solid black;
     margin: 5px;
     align-items: center;
-    background-color: #1e0f0f;
     opacity: .7;
     border-radius: 5px;
 }
-
+#mainInfo{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
+#extraInfo{
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+}
+.largeTemp{
+    font-size: 24px;
+}
+.large{
+    font-size: 20px;
+}
+.content{
+    font-size: 12px;
+}
 #singleWeatherCard{
     width: 100%;
     height: 98%;
@@ -217,14 +240,14 @@ select{
 
 .flip-card {
     width: 100%;
-    height: 350px;
+    height: 215px;
     perspective: 1000px;
     box-shadow: -17px 14px 8px 0 rgba(0,0,0,0.2);
 }
 .flip-card-inner {
     position: relative;
     width: 100%;
-    height: 350px;
+    height: 100%;
     text-align: center;
     transition: transform 0.6s;
     transform-style: preserve-3d;
@@ -234,19 +257,21 @@ select{
     display: flex;
     flex-direction: column;
     width: 100%;
-    height: 350px;
+    height: 100%;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
 }
 .flip-card-front {
-    height: 350px;
+    height: 100%;
     width: 100%;
     align-items: center;
 }
 .flip-card-back {
-    height: 350px;
+    height: 100%;
     width: 100%;
+    justify-content: space-between;
     transform: rotateY(180deg);
+    font-size: 15px;
 }
 .flip{
     transform: rotateY(180deg);
@@ -256,25 +281,33 @@ select{
     .weatherCard{
         width: 28%;
     }
+    .flip-card{
+        height: 350px;
+    }
     #mainInfo{
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: space-evenly;
         width: 60%;
         height: 100%;
     }
+    .content{
+        font-size: 13px;
+    }
     #currWeatherArea{
-        display: flex;
+        flex-direction: row;
         width: 50vw;
         justify-content: center;
         align-items: center;
+        height: 100%;
+    }
+    #mapAndCurr{
+        height: 40vh;
+        flex-direction: row;
     }
     #currentAddress{
         width: 20%;
     }
     #map{
         width: 40vw;
+        height: 30vh;
     }
     #header{
         flex-direction: row;
@@ -294,6 +327,9 @@ select{
     .large{
         font-size: 20px;
     }
+    .frontData{
+        font-size: 22px;
+    }
     #singleIcon{
         width: 75px;
     }
@@ -310,7 +346,7 @@ select{
         height: 32%;
     }
     .headerItem{
-        margin: 1.1rem;
+        margin: .76rem;
     }
     .inputContainer{
         width: 30%;

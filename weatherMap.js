@@ -31,6 +31,9 @@ $(document).ready(function (){
         let day = d.getDate();
         return `${day} ${m} ${year}`;
     }
+    const meterToMile = (meter) => {
+        return meter * .000621371;
+    }
     const geocode = (search, token) => {
         const baseUrl = 'https://api.mapbox.com';const endPoint = '/geocoding/v5/mapbox.places/';return fetch(baseUrl + endPoint + encodeURIComponent(search) + '.json' + "?" + 'access_token=' + token).then(function(res) {return res.json();}).then(function(data) {return data.features[0].center;});}
     const reverseGeocode = (coordinates, token) => {
@@ -171,17 +174,21 @@ $(document).ready(function (){
                     <div id="mainInfo">
                         <img src="http://openweathermap.org/img/wn/${currObj.weather[0].icon}.png" alt="icon" id="singleIcon">
                         <p class="weekday large">${weekDay(currObj.dt)}</p>
+                        <p class="frontData head">${timeConverter(currObj.dt + obj.timezone_offset)}</p>
                         <p class="head large">${clockTime(currObj.dt + obj.timezone_offset + baseOffset)}</p>
-                        <p class="content largeTemp">${currObj.feels_like} ˚</p>
+                        <p class="largeTemp">${currObj.feels_like} ˚</p>
                     </div>
                     <div id="extraInfo">
                         <p class="content">Weather : ${cap(currObj.weather[0].description)}</p>
                         <p class="content">Sunrise : ${clockTime(currObj.sunrise)}</p>
                         <p class="content">Sunset : ${clockTime(currObj.sunset)}</p>
+                        <p class="content">Dew Point : ${currObj.dew_point}</p>
                         <p class="content">Wind speed : ${currObj.wind_speed} mph</p>
                         <p class="content">Wind direction : ${windDir(currObj.wind_deg)}</p>
                         <p class="content">High : ${currObj.temp}˚</p>
-                        <p class="content">Humidity : ${currObj.humidity}</p>
+                        <p class="content">Humidity : ${currObj.humidity} %</p>
+                        <p class="content">Pressure : ${currObj.pressure} hPa</p>
+                        <p class="content">Visibility : ${meterToMile(currObj.visibility).toFixed(1)} mi</p>
                         <p class="content">UVI : ${currObj.uvi}</p>
                     </div>
                 </div>`;
@@ -192,17 +199,18 @@ $(document).ready(function (){
                     <div class="flip-card-inner">
                         <div class="flip-card-front">
                             <img src="http://openweathermap.org/img/wn/${data.weather[0].icon}.png" alt="icon">
-                            <p class="weekday">${weekDay(data.dt)}</p>
-                            <p class="head">${timeConverter(data.dt + parentDataSet.timezone_offset)}</p>
-                            <p class="content">Feels like : ${data.temp.day} ˚</p>
-                            <p class="content">Wind direction : ${windDir(data.wind_deg)}</p>
-                            <p class="content">High : ${data.temp.max}˚</p>
-                            <p class="content">Min : ${data.temp.min}˚</p>
-                            <p class="content">Humidity : ${data.humidity}</p>
+                            <p class="frontData weekday">${weekDay(data.dt)}</p>
+                            <p class="frontData head">${timeConverter(data.dt + parentDataSet.timezone_offset)}</p>
+                            <p class="frontData">${data.temp.max}˚ / ${data.temp.min}˚</p>
                         </div>
                         <div class="flip-card-back">
-                            <p class="content">Weather : ${cap(data.weather[0].description)}</p>
-                            <p class="content">Wind speed : ${data.wind_speed} mph</p>
+                            <p class="content">${cap(data.weather[0].description)}</p>
+                            <p class="content">Feels like : ${data.temp.day} ˚</p>
+                            <p class="content">Wind : ${data.wind_speed} mph ${windDir(data.wind_deg)}</p>
+                            <p class="content">UVI : ${data.uvi}</p>
+                            <p class="content">Dew Point : ${data.dew_point}</p>
+                            <p class="content">Humidity : ${data.humidity}</p>
+                            <p class="content">Pressure : ${data.pressure} hPa</p>
                         </div>
                     </div>
                 </div>`;
@@ -213,16 +221,15 @@ $(document).ready(function (){
                     <div class="flip-card-inner">
                         <div class="flip-card-front">
                             <img src="http://openweathermap.org/img/wn/${data.weather[0].icon}.png" alt="icon">
-                            <p class="weekday">${weekDay(data.dt)}</p>
-                            <p class="head">${timeConverter(data.dt + parentDataSet.timezone_offset)}</p>
-                            <p class="content">Feels like : ${data.feels_like} ˚</p>
-                            <p class="content">Wind direction : ${windDir(data.wind_deg)}</p>
-                            <p class="content">High : ${data.temp}˚</p>
-                            <p class="content">Humidity : ${data.humidity}</p>
+                            <p class="frontData weekday">${weekDay(data.dt)}</p>
+                            <p class="frontData head">${timeConverter(data.dt + parentDataSet.timezone_offset)}</p>
+                            <p class="frontData content">${data.feels_like} ˚</p>
                         </div>
                         <div class="flip-card-back">
-                            <p class="content">Weather : ${cap(data.weather[0].description)}</p>
-                            <p class="content">Wind speed : ${data.wind_speed} mph</p>
+                            <p class="content">${cap(data.weather[0].description)}</p>
+                            <p class="content">High : ${data.temp}˚</p>
+                            <p class="content">Wind : ${data.wind_speed} mph ${windDir(data.wind_deg)}</p>
+                            <p class="content">Humidity : ${data.humidity}</p>
                         </div>
                     </div>
                 </div>`;
@@ -339,6 +346,9 @@ $(document).ready(function (){
 
 // NEED TO FINISH:
     /*
+    *
+    * CURRENT WEATHER INFO IN MOBILE VIEW
+    *
     *  COULD MEMOIZE WITH A CACHE
     *
     *  HAVE THE HOURLY FORECAST START FROM THE CURRENT HOUR ON WARD ( GET DATE() AND COMPARE DT GET THAT INDEX AND RENDER FROM THERE ON )
