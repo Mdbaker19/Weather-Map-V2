@@ -11,7 +11,7 @@ $(document).ready(function (){
         let date = new Date(unix * 1000);
         let hours;
         if(twelveHR) {
-            hours = (date.getHours()) % 12;
+            hours = date.getHours() % 12;
         } else {
             hours = date.getHours();
         }
@@ -47,9 +47,6 @@ $(document).ready(function (){
     let cache = {};
     const doc = $("body");
 
-    let usingWeekly = true;
-    let usingHourly = false;
-
     const moon = "<i class=\"fas fa-moon\"></i>";
     const sun = "<i class=\"fas fa-sun\"></i>";
     const header = $("#header");
@@ -76,19 +73,19 @@ $(document).ready(function (){
             twelveHR = false;
         }
         $("#time").text(clockTime(cache.current.dt + cache.timezone_offset + baseOffset));
+        $("#fullOnly3Hour").html(everyThreeHours(cache.hourly, currentHour));
     });
 
     const currTime = new Date();
     const it = currTime.getTime()
-    console.log(clockTime(it + baseOffset))
-
     // console.log(currTime.toLocaleTimeString()); // 736pm
     // console.log(currTime.toString().substring(0, 24));
 
     function getWeather(lng, lat){
-        fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&exclude=hourly,minutely&units=imperial&appid=${openWeatherApi}`).then( r => {
+        fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&exclude=minutely&units=imperial&appid=${openWeatherApi}`).then( r => {
             r.json().then(data => {
                 $("#weatherArea").html(fullForecast(data.daily, data));
+                $("#fullOnly3Hour").html(everyThreeHours(data.hourly));
                 displayOtherInfo(data, lng, lat);
                 cache = data;
                 console.log(data);
@@ -96,15 +93,25 @@ $(document).ready(function (){
         });
     }
 
-    function weatherHourly(lng, lat){
-        fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&exclude=daily,minutely&units=imperial&appid=${openWeatherApi}`).then( r => {
-            r.json().then(data => {
-                $("#weatherArea").html(twentyFourHourForecast(data.hourly, data));
-                displayOtherInfo(data, lng, lat);
-                cache = data;
-                console.log(data);
-            });
-        });
+    function everyThreeHours(arr){
+        let html = "";
+        let count = 0;
+        for(let i = 0; i < arr.length; i++){
+                html += threeHourTempRender(arr[i]);
+                i+=2;
+                count++;
+            if(count > 4){
+                break;
+            }
+        }
+        return html;
+    }
+
+    function threeHourTempRender(obj){
+        return `<div id="threeHour">
+                    <p class="three" id="threeHourTime">${clockTime(obj.dt).substring(0, 7)}  </p>
+                    <p class="three" id="threeHourTemp">${obj.temp} ˚</p>
+                </div>`
     }
 
     function displayOtherInfo(data, lng, lat){
@@ -112,6 +119,14 @@ $(document).ready(function (){
         getLocation({lng:lng, lat:lat});
         getImage(data.current.weather[0].main);
         $("#time").text(clockTime(data.current.dt + data.timezone_offset + baseOffset));
+        $("#todayDate").html(todaysDate(data.current, data));
+    }
+
+    function todaysDate (currObj, obj){
+        return `<div id="dateInfo">
+                    <p class="weekday large">${weekDay(currObj.dt)}</p>
+                    <p class="head large">${timeConverter(currObj.dt + obj.timezone_offset)}</p>
+                </div>`;
     }
 
     getWeather(latLon[0], latLon[1]);
@@ -142,11 +157,7 @@ $(document).ready(function (){
             lng: coord.lng
         };
         latLon = [position.lng, position.lat];
-        if(usingWeekly) {
-            getWeather(position.lng, position.lat);
-        } else if(usingHourly){
-            weatherHourly(position.lng, position.lat);
-        }
+        getWeather(position.lng, position.lat);
     }
 
     let geocoder = new MapboxGeocoder({
@@ -160,21 +171,13 @@ $(document).ready(function (){
         latLon[0] = e.result.center[0];
         latLon[1] = e.result.center[1];
         marker.setLngLat(latLon);
-        if(usingWeekly) {
-            getWeather(latLon[0], latLon[1]);
-        } else if(usingHourly){
-            weatherHourly(latLon[0], latLon[1]);
-        }
+        getWeather(latLon[0], latLon[1]);
     });
 
     map.addControl(geocoder);
 
-    function currentWeatherOnly(currObj, obj){
+    function currentWeatherOnly(currObj){
         return `<div class="weatherCardCopy" id="singleCurrCard">
-                    <div id="dateInfo">
-                        <p class="weekday large">${weekDay(currObj.dt)}</p>
-                        <p class="frontData head">${timeConverter(currObj.dt + obj.timezone_offset)}</p>                    
-                    </div>
                     <div id="weatherData">
                         <div id="mainInfo">
                             <img src="http://openweathermap.org/img/wn/${currObj.weather[0].icon}.png" alt="icon" id="singleIcon">
@@ -223,37 +226,10 @@ $(document).ready(function (){
                 </div>`;
     }
 
-    function renderHourly(data, parentDataSet){
-        return `<div class="weatherCard flip-card" id="card">
-                    <div class="flip-card-inner">
-                        <div class="flip-card-front">
-                            <img src="http://openweathermap.org/img/wn/${data.weather[0].icon}.png" alt="icon">
-                            <p class="frontData weekday">${weekDay(data.dt)}</p>
-                            <p class="frontData head">${timeConverter(data.dt + parentDataSet.timezone_offset)}</p>
-                            <p class="frontData content">${data.feels_like} ˚</p>
-                        </div>
-                        <div class="flip-card-back">
-                            <p class="content">${cap(data.weather[0].description)}</p>
-                            <p class="content">High : ${data.temp}˚</p>
-                            <p class="content">Wind : ${data.wind_speed} mph ${windDir(data.wind_deg)}</p>
-                            <p class="content">Humidity : ${data.humidity}</p>
-                        </div>
-                    </div>
-                </div>`;
-    }
-
     function fullForecast(arr, obj){
         let html = "";
         for(let i = 1; i < arr.length; i++){
             html += render(arr[i], obj);
-        }
-        return html;
-    }
-
-    function twentyFourHourForecast(arr, obj){
-        let html = "";
-        for(let i = 0; i < 25; i++){
-            html += renderHourly(arr[i], obj);
         }
         return html;
     }
@@ -302,36 +278,12 @@ $(document).ready(function (){
         }
     }
 
-    $("#weatherDisplay").on("change", () => {
-        let choice = $("#weatherDisplay").val();
-        if(choice === "daily"){
-            usingHourly = false;
-            usingWeekly = true;
-            $("#weatherArea").css({
-                "overflow": "hidden",
-            });
-            getWeather(latLon[0], latLon[1]);
-        } else if(choice === "hourly"){
-            usingHourly = true;
-            usingWeekly = false;
-            $("#weatherArea").css({
-                "overflow": "scroll",
-                "overflow-x": "hidden"
-            });
-            weatherHourly(latLon[0], latLon[1]);
-        }
-    });
-
     function callSearch(input){
         geocode(input, mapboxToken).then(r => {
             latLon = r;
             marker.setLngLat(r);
             mapFly(latLon);
-            if(usingWeekly) {
-                getWeather(latLon[0], latLon[1]);
-            } else if(usingHourly){
-                weatherHourly(latLon[0], latLon[1]);
-            }
+            getWeather(latLon[0], latLon[1]);
         });
     }
 
