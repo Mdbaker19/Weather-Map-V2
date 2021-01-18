@@ -7,6 +7,8 @@ $(document).ready(function (){
 
     const moon = "<i class=\"fas fa-moon\"></i>";
     const sun = "<i class=\"fas fa-sun\"></i>";
+    const header = $("#header");
+    const card = $(".weatherCard");
 
     const lightModeMap = "mapbox://styles/mapbox/streets-v11";
     const darkModeMap = "mapbox://styles/mapbox/dark-v10";
@@ -78,18 +80,17 @@ $(document).ready(function (){
 
 
 
-
     function render(data, parentDataSet){
         return `<div class="weatherCard">
                     <img src="http://openweathermap.org/img/wn/${data.weather[0].icon}.png" alt="icon">
                     <p class="weekday">${weekDay(data.dt)}</p>
                     <p class="head">${timeConverter(data.dt + parentDataSet.timezone_offset)}</p>
-                    <p class="content">Feels like : ${data.temp.day}</p>
+                    <p class="content">Feels like : ${data.temp.day} ˚</p>
                     <p class="content">Weather : ${cap(data.weather[0].description)}</p>
-                    <p class="content">Wind speed : ${data.wind_speed}</p>
+                    <p class="content">Wind speed : ${data.wind_speed} mph</p>
                     <p class="content">Wind direction : ${windDir(data.wind_deg)}</p>
-                    <p class="content">High : ${data.temp.max}</p>
-                    <p class="content">Min : ${data.temp.min}</p>
+                    <p class="content">High : ${data.temp.max}˚</p>
+                    <p class="content">Min : ${data.temp.min}˚</p>
                     <p class="content">Humidity : ${data.humidity}</p>
                 </div>`;
     }
@@ -133,9 +134,22 @@ $(document).ready(function (){
 
     function lightModeStyle(){
         console.log("switch to light mode");
+        header.css({
+            "backgroundColor":"white"
+        });
+        card.css({
+            "backgroundColor":"white"
+        });
     }
     function darkModeStyle(){
         console.log("switch to dark mode");
+        header.css({
+            "backgroundColor": "#1e0f0f"
+        });
+        card.css({
+            "backgroundColor":"#1e0f0f"
+        });
+
     }
 
 
@@ -198,7 +212,7 @@ $(document).ready(function (){
             case "Clear":
                 body.style.backgroundImage = "url('img/sun.jpg')";
                 body.style.backgroundColor = "#48aff2";
-                weatherArea.style.color = "#342f2f";
+                weatherArea.style.color = "#4fb286";
                 break;
             case "Clouds":
                 body.style.backgroundImage = "url('img/cloudy.jpg')";
