@@ -158,7 +158,7 @@ button:hover{
 #dateInfo{
     display: flex;
     width: 100%;
-    justify-content: center;
+    justify-content: space-around;
 }
 #extraInfo{
     display: flex;
@@ -166,11 +166,14 @@ button:hover{
     width: 100%;
 }
 #singleCurrCard{
-    width: 90%;
+    width: 95%;
     color: white;
     border: none;
     background: none;
     flex-direction: column;
+}
+#weatherData{
+    width: 100%;
 }
 .largeTemp{
     font-size: 30px;
@@ -187,10 +190,8 @@ button:hover{
     font-size: 18px;
 }
 
-select{
+#todayDate{
     width: 80%;
-    height: 20%;
-    background: #343333;
     color: aliceblue;
     outline: none;
     background: none;
@@ -288,6 +289,23 @@ select{
 .flip{
     transform: rotateY(180deg);
 }
+#fullOnly3Hour{
+    display: none;
+}
+#threeHour{
+    display: flex;
+    width: 50%;
+    justify-content: space-around;
+}
+.three{
+    width: 50%;
+}
+#threeHourTime{
+
+}
+#threeHourTemp{
+
+}
 
 @media screen and (min-width: 768px){
     .weatherCard{
@@ -297,8 +315,7 @@ select{
         height: 225px;
     }
     #mainInfo{
-        width: 60%;
-        height: 100%;
+        width: 55%;
         align-items: baseline;
     }
     #dateInfo{
@@ -310,6 +327,7 @@ select{
     }
     #weatherData{
         display: flex;
+        flex-direction: column;
         height: 90%;
         width: 100%;
     }
@@ -354,7 +372,7 @@ select{
         justify-content: space-evenly;
     }
     .large{
-        font-size: 20px;
+        font-size: 15px;
     }
     .frontData{
         font-size: 22px;
@@ -363,15 +381,15 @@ select{
         width: 75px;
     }
     #extraInfo{
-        width: 40%;
+        width: 100%;
         font-size: 13px;
         height: 75%;
         display: flex;
         justify-content: space-evenly;
     }
-    select{
+    #todayDate{
         width: 22%;
-        height: 32%;
+        margin: auto 0;
     }
     .headerItem{
         margin: .76rem;
@@ -386,6 +404,14 @@ select{
         align-self: center;
     }
 }
+@media screen and (min-width: 1024px) {
+    .large{
+        font-size: 20px;
+    }
+    #extraInfo{
+        width: 70%;
+    }
+}
 @media screen and (min-width: 1399px) {
     body{
         font-size: 16px;
@@ -393,9 +419,28 @@ select{
     .weatherCard{
         width: 12%;
     }
+    .content{
+        font-size: 15px;
+    }
+    #mapAndCurr{
+        width: 95vw;
+    }
     #weatherArea{
         overflow: hidden;
         justify-content: space-between;
         width: 95vw;
+    }
+    #currWeatherArea{
+        width: 40%;
+    }
+    #map{
+        width: 40%;
+    }
+    #fullOnly3Hour{
+        display: flex;
+        flex-direction: column;
+        justify-content: space-around;
+        width: 20%;
+        height: 100%;
     }
 }
