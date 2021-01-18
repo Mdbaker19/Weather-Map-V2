@@ -171,25 +171,32 @@ $(document).ready(function (){
 
     function currentWeatherOnly(currObj, obj){
         return `<div class="weatherCardCopy" id="singleCurrCard">
-                    <div id="mainInfo">
-                        <img src="http://openweathermap.org/img/wn/${currObj.weather[0].icon}.png" alt="icon" id="singleIcon">
+                    <div id="dateInfo">
                         <p class="weekday large">${weekDay(currObj.dt)}</p>
-                        <p class="frontData head">${timeConverter(currObj.dt + obj.timezone_offset)}</p>
-                        <p class="head large">${clockTime(currObj.dt + obj.timezone_offset + baseOffset)}</p>
-                        <p class="largeTemp">${currObj.feels_like} ˚</p>
+                        <p class="frontData head">${timeConverter(currObj.dt + obj.timezone_offset)}</p>                    
                     </div>
-                    <div id="extraInfo">
-                        <p class="content">Weather : ${cap(currObj.weather[0].description)}</p>
-                        <p class="content">Sunrise : ${clockTime(currObj.sunrise)}</p>
-                        <p class="content">Sunset : ${clockTime(currObj.sunset)}</p>
-                        <p class="content">Dew Point : ${currObj.dew_point}</p>
-                        <p class="content">Wind speed : ${currObj.wind_speed} mph</p>
-                        <p class="content">Wind direction : ${windDir(currObj.wind_deg)}</p>
-                        <p class="content">High : ${currObj.temp}˚</p>
-                        <p class="content">Humidity : ${currObj.humidity} %</p>
-                        <p class="content">Pressure : ${currObj.pressure} hPa</p>
-                        <p class="content">Visibility : ${meterToMile(currObj.visibility).toFixed(1)} mi</p>
-                        <p class="content">UVI : ${currObj.uvi}</p>
+                    <div id="weatherData">
+                        <div id="mainInfo">
+                            <img src="http://openweathermap.org/img/wn/${currObj.weather[0].icon}.png" alt="icon" id="singleIcon">
+                            <p class="largeTemp">${currObj.feels_like} ˚</p>
+                        </div>
+                        <div id="extraInfo">
+                            <div id="extraOne" class="extra">
+                                <p class="content">Weather : ${cap(currObj.weather[0].description)}</p>
+                                <p class="content">Sunrise : ${clockTime(currObj.sunrise)}</p>
+                                <p class="content">Sunset : ${clockTime(currObj.sunset)}</p>
+                                <p class="content">Dew Point : ${currObj.dew_point}</p>
+                                <p class="content">Wind speed : ${currObj.wind_speed} mph</p>
+                            </div>
+                            <div id="extraTwo" class="extra">
+                                <p class="content">Wind direction : ${windDir(currObj.wind_deg)}</p>
+                                <p class="content">High : ${currObj.temp}˚</p>
+                                <p class="content">Humidity : ${currObj.humidity} %</p>
+                                <p class="content">Pressure : ${currObj.pressure} hPa</p>
+                                <p class="content">Visibility : ${meterToMile(currObj.visibility).toFixed(1)} mi</p>
+                                <p class="content">UVI : ${currObj.uvi}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>`;
     }

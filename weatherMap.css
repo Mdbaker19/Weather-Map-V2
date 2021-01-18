@@ -58,12 +58,10 @@ button:hover{
 .dark{
     color: #4fb286;
     background-color: #1e0f0f;
-    border: 4px solid black;
 }
 .light{
     color: #1a221f;
     background-color: #898686;
-    border: 4px solid #313131;
 }
 #time{
     margin-top: .15rem;
@@ -131,10 +129,8 @@ button:hover{
     flex-direction: column;
     justify-content: space-around;
     padding: 5px;
-    border: 1px solid black;
     margin: 5px;
     align-items: center;
-    background-color: #1e0f0f;
     opacity: .7;
     border-radius: 5px;
     color: #4fb286;
@@ -152,17 +148,32 @@ button:hover{
 }
 #mainInfo{
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: space-evenly;
+    width: 100%;
+}
+#singleIcon{
+    width: 95px;
+}
+#dateInfo{
+    display: flex;
+    width: 100%;
+    justify-content: center;
 }
 #extraInfo{
     display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+#singleCurrCard{
+    width: 90%;
+    color: white;
+    border: none;
+    background: none;
     flex-direction: column;
-    justify-content: space-evenly;
 }
 .largeTemp{
-    font-size: 24px;
+    font-size: 30px;
 }
 .large{
     font-size: 20px;
@@ -242,7 +253,7 @@ select{
     width: 100%;
     height: 215px;
     perspective: 1000px;
-    box-shadow: -17px 14px 8px 0 rgba(0,0,0,0.2);
+    box-shadow: -3px 2px 1px 0 rgba(0,0,0,0.1);
 }
 .flip-card-inner {
     position: relative;
@@ -269,8 +280,9 @@ select{
 .flip-card-back {
     height: 100%;
     width: 100%;
-    justify-content: space-between;
     transform: rotateY(180deg);
+    justify-content: center;
+    align-items: center;
     font-size: 15px;
 }
 .flip{
@@ -282,14 +294,24 @@ select{
         width: 28%;
     }
     .flip-card{
-        height: 350px;
+        height: 225px;
     }
     #mainInfo{
         width: 60%;
         height: 100%;
+        align-items: baseline;
+    }
+    #dateInfo{
+        justify-content: space-evenly;
+        height: 10%;
     }
     .content{
         font-size: 13px;
+    }
+    #weatherData{
+        display: flex;
+        height: 90%;
+        width: 100%;
     }
     #currWeatherArea{
         flex-direction: row;
@@ -319,10 +341,17 @@ select{
         color: white;
         border: none;
         background: none;
-        flex-direction: row;
     }
     .largeTemp{
         font-size: 30px;
+        align-self: flex-start;
+        margin-top: 13px;
+    }
+    .extra{
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
     }
     .large{
         font-size: 20px;
@@ -338,7 +367,6 @@ select{
         font-size: 13px;
         height: 75%;
         display: flex;
-        flex-direction: column;
         justify-content: space-evenly;
     }
     select{
@@ -363,9 +391,11 @@ select{
         font-size: 16px;
     }
     .weatherCard{
-        width: 13%;
+        width: 12%;
     }
     #weatherArea{
         overflow: hidden;
+        justify-content: space-between;
+        width: 95vw;
     }
 }
