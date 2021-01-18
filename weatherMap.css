@@ -124,6 +124,20 @@ button:hover{
     opacity: .7;
     border-radius: 5px;
 }
+.weatherCardCopy{
+    width: 80%;
+    height: 96%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    padding: 5px;
+    border: 1px solid black;
+    margin: 5px;
+    align-items: center;
+    background-color: #1e0f0f;
+    opacity: .7;
+    border-radius: 5px;
+}
 
 #singleWeatherCard{
     width: 100%;
@@ -223,10 +237,10 @@ select{
 .flip-card-back {
     height: 350px;
     width: 100%;
-    transform: perspective(250px) rotateY(180deg);
+    transform: rotateY(180deg);
 }
 .flip{
-    transform: perspective(500px) rotateY(180deg);
+    transform: rotateY(180deg);
 }
 
 @media screen and (min-width: 768px){

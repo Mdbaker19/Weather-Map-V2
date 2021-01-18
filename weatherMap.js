@@ -64,7 +64,6 @@ $(document).ready(function (){
         $("#time").text(clockTime(data.current.dt + data.timezone_offset + baseOffset));
     }
 
-
     getWeather(latLon[0], latLon[1]);
 
     mapboxgl.accessToken = mapboxToken;
@@ -121,7 +120,7 @@ $(document).ready(function (){
     map.addControl(geocoder);
 
     function currentWeatherOnly(currObj, obj){
-        return `<div class="weatherCard" id="singleCurrCard">
+        return `<div class="weatherCardCopy" id="singleCurrCard">
                     <div id="mainInfo">
                         <img src="http://openweathermap.org/img/wn/${currObj.weather[0].icon}.png" alt="icon">
                         <p class="weekday">${weekDay(currObj.dt)}</p>
@@ -140,8 +139,6 @@ $(document).ready(function (){
                     </div>
                 </div>`;
     }
-
-
 
     function render(data, parentDataSet){
         return `<div class="weatherCard flip-card" id="card">
@@ -246,7 +243,6 @@ $(document).ready(function (){
         });
     }
 
-
     $("#weatherDisplay").on("change", () => {
         let choice = $("#weatherDisplay").val();
         if(choice === "daily"){
@@ -296,8 +292,6 @@ $(document).ready(function (){
         });
     }
 
-
-
 // NEED TO FINISH:
     /*
     *  DARK MODE / LIGHT MODE COLORS
@@ -313,7 +307,6 @@ $(document).ready(function (){
     *  IF CURRENT TIME AFTER CURRENT SUNSET THEN NIGHT MODE (?)
     *
     * */
-
 
     $("body").on("click", ".weatherCard", function (){
         const currCard = $(this).children()[0];
