@@ -120,23 +120,6 @@ $(document).ready(function (){
 
     map.addControl(geocoder);
 
-
-
-    function render(data, parentDataSet){
-        return `<div class="weatherCard">
-                    <img src="http://openweathermap.org/img/wn/${data.weather[0].icon}.png" alt="icon">
-                    <p class="weekday">${weekDay(data.dt)}</p>
-                    <p class="head">${timeConverter(data.dt + parentDataSet.timezone_offset)}</p>
-                    <p class="content">Feels like : ${data.temp.day} ˚</p>
-<!--                    <p class="content">Weather : ${cap(data.weather[0].description)}</p>-->
-<!--                    <p class="content">Wind speed : ${data.wind_speed} mph</p>-->
-                    <p class="content">Wind direction : ${windDir(data.wind_deg)}</p>
-                    <p class="content">High : ${data.temp.max}˚</p>
-                    <p class="content">Min : ${data.temp.min}˚</p>
-                    <p class="content">Humidity : ${data.humidity}</p>
-                </div>`;
-    }
-
     function currentWeatherOnly(currObj, obj){
         return `<div class="weatherCard" id="singleCurrCard">
                     <div id="mainInfo">
@@ -158,17 +141,46 @@ $(document).ready(function (){
                 </div>`;
     }
 
+
+
+    function render(data, parentDataSet){
+        return `<div class="weatherCard flip-card" id="card">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <img src="http://openweathermap.org/img/wn/${data.weather[0].icon}.png" alt="icon">
+                            <p class="weekday">${weekDay(data.dt)}</p>
+                            <p class="head">${timeConverter(data.dt + parentDataSet.timezone_offset)}</p>
+                            <p class="content">Feels like : ${data.temp.day} ˚</p>
+                            <p class="content">Wind direction : ${windDir(data.wind_deg)}</p>
+                            <p class="content">High : ${data.temp.max}˚</p>
+                            <p class="content">Min : ${data.temp.min}˚</p>
+                            <p class="content">Humidity : ${data.humidity}</p>
+                        </div>
+                        <div class="flip-card-back">
+                            <p class="content">Weather : ${cap(data.weather[0].description)}</p>
+                            <p class="content">Wind speed : ${data.wind_speed} mph</p>
+                        </div>
+                    </div>
+                </div>`;
+    }
+
     function renderHourly(data, parentDataSet){
-        return `<div class="weatherCard">
-                    <img src="http://openweathermap.org/img/wn/${data.weather[0].icon}.png" alt="icon">
-                    <p class="weekday">${weekDay(data.dt)}</p>
-                    <p class="head">${clockTime(data.dt + parentDataSet.timezone_offset)}</p>
-                    <p class="content">Feels like : ${data.feels_like} ˚</p>
-                    <p class="content">Weather : ${cap(data.weather[0].description)}</p>
-                    <p class="content">Wind speed : ${data.wind_speed} mph</p>
-                    <p class="content">Wind direction : ${windDir(data.wind_deg)}</p>
-                    <p class="content">High : ${data.temp}˚</p>
-                    <p class="content">Humidity : ${data.humidity}</p>
+        return `<div class="weatherCard flip-card" id="card">
+                    <div class="flip-card-inner">
+                        <div class="flip-card-front">
+                            <img src="http://openweathermap.org/img/wn/${data.weather[0].icon}.png" alt="icon">
+                            <p class="weekday">${weekDay(data.dt)}</p>
+                            <p class="head">${timeConverter(data.dt + parentDataSet.timezone_offset)}</p>
+                            <p class="content">Feels like : ${data.feels_like} ˚</p>
+                            <p class="content">Wind direction : ${windDir(data.wind_deg)}</p>
+                            <p class="content">High : ${data.temp}˚</p>
+                            <p class="content">Humidity : ${data.humidity}</p>
+                        </div>
+                        <div class="flip-card-back">
+                            <p class="content">Weather : ${cap(data.weather[0].description)}</p>
+                            <p class="content">Wind speed : ${data.wind_speed} mph</p>
+                        </div>
+                    </div>
                 </div>`;
     }
 
@@ -215,7 +227,6 @@ $(document).ready(function (){
         marker.on("dragend", updateMarker);
     });
 
-
     function lightModeStyle(){
         console.log("switch to light mode");
         header.css({
@@ -233,7 +244,6 @@ $(document).ready(function (){
         card.css({
             "backgroundColor":"#1e0f0f"
         });
-
     }
 
 
@@ -243,8 +253,7 @@ $(document).ready(function (){
             usingHourly = false;
             usingWeekly = true;
             $("#weatherArea").css({
-                "overflow": "scroll",
-                "overflow-x": "hidden"
+                "overflow": "hidden",
             });
             getWeather(latLon[0], latLon[1]);
         } else if(choice === "hourly"){
@@ -306,10 +315,15 @@ $(document).ready(function (){
     * */
 
 
-
-
-
-
+    $("body").on("click", ".weatherCard", function (){
+        const currCard = $(this).children()[0];
+        const classes = currCard.classList;
+        if(!classes.contains("flip")){
+            classes.add("flip");
+        } else {
+            classes.remove("flip");
+        }
+    });
 
     function getLocation(obj){
         reverseGeocode(obj, mapboxToken).then(r => {
@@ -338,6 +352,4 @@ $(document).ready(function (){
                 break;
         }
     }
-
-
 });
