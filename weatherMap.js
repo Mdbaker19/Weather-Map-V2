@@ -347,7 +347,7 @@ $(document).ready(function (){
 // NEED TO FINISH:
     /*
     *
-    * CURRENT WEATHER INFO IN MOBILE VIEW
+    *  MAP DARK MODE MAYBE JUST DO CURRENT MAPBOXGL.MAP.STYLE CHANGE (?)
     *
     *  COULD MEMOIZE WITH A CACHE
     *
