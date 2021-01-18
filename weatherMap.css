@@ -48,15 +48,22 @@ button:hover{
     width: 95vw;
     margin: auto;
     height: 18vh;
-    border: 4px solid black;
     display: flex;
     flex-direction: column;
-    background-color: #1e0f0f;
     opacity: .7;
-    color: #4fb286;
     align-items: center;
     justify-content: space-around;
     border-radius: 5px;
+}
+.dark{
+    color: #4fb286;
+    background-color: #1e0f0f;
+    border: 4px solid black;
+}
+.light{
+    color: #1a221f;
+    background-color: #898686;
+    border: 4px solid #313131;
 }
 #time{
     margin-top: .15rem;
@@ -67,7 +74,7 @@ button:hover{
     margin-top: .15rem;
     margin-bottom: .15rem;
     align-self: center;
-    width: 20%;
+    width: 80%;
 }
 #darkLight{
     height: 25%;
@@ -123,6 +130,7 @@ button:hover{
     background-color: #1e0f0f;
     opacity: .7;
     border-radius: 5px;
+    color: #4fb286;
 }
 .weatherCardCopy{
     width: 80%;
@@ -211,6 +219,7 @@ select{
     width: 100%;
     height: 350px;
     perspective: 1000px;
+    box-shadow: -17px 14px 8px 0 rgba(0,0,0,0.2);
 }
 .flip-card-inner {
     position: relative;
@@ -228,11 +237,11 @@ select{
     height: 350px;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    box-shadow: -17px 14px 8px 0 rgba(0,0,0,0.2);
 }
 .flip-card-front {
     height: 350px;
     width: 100%;
+    align-items: center;
 }
 .flip-card-back {
     height: 350px;
@@ -261,6 +270,9 @@ select{
         justify-content: center;
         align-items: center;
     }
+    #currentAddress{
+        width: 20%;
+    }
     #map{
         width: 40vw;
     }
@@ -276,8 +288,22 @@ select{
         background: none;
         flex-direction: row;
     }
+    .largeTemp{
+        font-size: 30px;
+    }
+    .large{
+        font-size: 20px;
+    }
+    #singleIcon{
+        width: 75px;
+    }
     #extraInfo{
         width: 40%;
+        font-size: 13px;
+        height: 75%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-evenly;
     }
     select{
         width: 22%;

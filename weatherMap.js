@@ -1,17 +1,48 @@
 $(document).ready(function (){
-    const cap = (string) =>{let sArr = string.split(" ");if(sArr.length > 1) {return sArr[0].charAt(0).toUpperCase() + sArr[0].substring(1) + " " + sArr[1].charAt(0).toUpperCase() + sArr[1].substring(1);}return sArr[0].charAt(0).toUpperCase() + sArr[0].substring(1);}
-    const windDir = (d) =>{d += 22.5;if (d < 0) d = 360 - Math.abs(d) % 360; else d = d % 360;let w = parseInt(d / 45);return `${directions[w]}`;}
-    const clockTime = (unix) =>{let date = new Date(unix * 1000);let hours = date.getHours();let minutes = "0" + date.getMinutes();let seconds = "0" + date.getSeconds();return `${hours} : ${minutes.substr(-2)} : ${seconds.substr(-2)}`;}
-    const weekDay = (unix) =>{let d = new Date(unix * 1000);let day = d.getDay();return `${days[day]}`;}
-    const timeConverter = (unix) =>{let d = new Date(unix * 1000);let year = d.getFullYear();let month = d.getMonth();let m = months[month];let day = d.getDate();return `${day} ${m} ${year}`;}
-    const geocode = (search, token) => {const baseUrl = 'https://api.mapbox.com';const endPoint = '/geocoding/v5/mapbox.places/';return fetch(baseUrl + endPoint + encodeURIComponent(search) + '.json' + "?" + 'access_token=' + token).then(function(res) {return res.json();}).then(function(data) {return data.features[0].center;});}
-    const reverseGeocode = (coordinates, token) => {const baseUrl = 'https://api.mapbox.com';const endPoint = '/geocoding/v5/mapbox.places/';return fetch(baseUrl + endPoint + coordinates.lng + "," + coordinates.lat + '.json' + "?" + 'access_token=' + token).then(function(res) {return res.json();}).then(function(data) {return data.features[1].place_name;});}
+    const cap = (string) =>{
+        let sArr = string.split(" ");if(sArr.length > 1) {
+            return sArr[0].charAt(0).toUpperCase() + sArr[0].substring(1) + " " + sArr[1].charAt(0).toUpperCase() + sArr[1].substring(1);}return sArr[0].charAt(0).toUpperCase() + sArr[0].substring(1);
+    }
+    const windDir = (d) =>{
+        d += 22.5;if (d < 0) d = 360 - Math.abs(d) % 360; else d = d % 360;
+        let w = parseInt(d / 45);return `${directions[w]}`;
+    }
+    const clockTime = (unix) =>{
+        let date = new Date(unix * 1000);
+        let hours;
+        if(twelveHR) {
+            hours = (date.getHours()) % 12;
+        } else {
+            hours = date.getHours();
+        }
+        let minutes = "0" + date.getMinutes();
+        let seconds = "0" + date.getSeconds();
+        return `${hours} : ${minutes.substr(-2)} : ${seconds.substr(-2)}`;
+    }
+    const weekDay = (unix) =>{
+        let d = new Date(unix * 1000);
+        let day = d.getDay();return `${days[day]}`;
+    }
+    const timeConverter = (unix) =>{
+        let d = new Date(unix * 1000);
+        let year = d.getFullYear();
+        let month = d.getMonth();
+        let m = months[month];
+        let day = d.getDate();
+        return `${day} ${m} ${year}`;
+    }
+    const geocode = (search, token) => {
+        const baseUrl = 'https://api.mapbox.com';const endPoint = '/geocoding/v5/mapbox.places/';return fetch(baseUrl + endPoint + encodeURIComponent(search) + '.json' + "?" + 'access_token=' + token).then(function(res) {return res.json();}).then(function(data) {return data.features[0].center;});}
+    const reverseGeocode = (coordinates, token) => {
+        const baseUrl = 'https://api.mapbox.com';const endPoint = '/geocoding/v5/mapbox.places/';return fetch(baseUrl + endPoint + coordinates.lng + "," + coordinates.lat + '.json' + "?" + 'access_token=' + token).then(function(res) {return res.json();}).then(function(data) {return data.features[1].place_name;});}
 
     const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
     const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
     const baseOffset = 21600;
     let count = 0;
+    let cache = {};
+    const doc = $("body");
 
     let usingWeekly = true;
     let usingHourly = false;
@@ -19,7 +50,7 @@ $(document).ready(function (){
     const moon = "<i class=\"fas fa-moon\"></i>";
     const sun = "<i class=\"fas fa-sun\"></i>";
     const header = $("#header");
-    const card = $(".weatherCard");
+    const card = document.getElementsByClassName("weatherCard");
 
     const lightModeMap = "mapbox://styles/mapbox/streets-v11";
     const darkModeMap = "mapbox://styles/mapbox/dark-v10";
@@ -29,6 +60,20 @@ $(document).ready(function (){
     let latLon = [-98.43, 29.42];
     let weatherArea = document.getElementById("weatherArea");
     let body = document.querySelector("body");
+
+    let twelveHR = false;
+    let hourCycle = 0;
+    $("#hourChange").on("click", () => {
+        hourCycle++;
+        if(hourCycle % 2 === 1) {
+            $("#hourChange").text("24HR");
+            twelveHR = true;
+        } else {
+            $("#hourChange").text("12HR");
+            twelveHR = false;
+        }
+        $("#time").text(clockTime(cache.current.dt + cache.timezone_offset + baseOffset));
+    });
 
     const currTime = new Date();
     const it = currTime.getTime()
@@ -42,6 +87,7 @@ $(document).ready(function (){
             r.json().then(data => {
                 $("#weatherArea").html(fullForecast(data.daily, data));
                 displayOtherInfo(data, lng, lat);
+                cache = data;
                 console.log(data);
             });
         });
@@ -52,6 +98,7 @@ $(document).ready(function (){
             r.json().then(data => {
                 $("#weatherArea").html(twentyFourHourForecast(data.hourly, data));
                 displayOtherInfo(data, lng, lat);
+                cache = data;
                 console.log(data);
             });
         });
@@ -122,10 +169,10 @@ $(document).ready(function (){
     function currentWeatherOnly(currObj, obj){
         return `<div class="weatherCardCopy" id="singleCurrCard">
                     <div id="mainInfo">
-                        <img src="http://openweathermap.org/img/wn/${currObj.weather[0].icon}.png" alt="icon">
-                        <p class="weekday">${weekDay(currObj.dt)}</p>
-                        <p class="head">${clockTime(currObj.dt + obj.timezone_offset + baseOffset)}</p>
-                        <p class="content">Feels like : ${currObj.feels_like} ˚</p>
+                        <img src="http://openweathermap.org/img/wn/${currObj.weather[0].icon}.png" alt="icon" id="singleIcon">
+                        <p class="weekday large">${weekDay(currObj.dt)}</p>
+                        <p class="head large">${clockTime(currObj.dt + obj.timezone_offset + baseOffset)}</p>
+                        <p class="content largeTemp">${currObj.feels_like} ˚</p>
                     </div>
                     <div id="extraInfo">
                         <p class="content">Weather : ${cap(currObj.weather[0].description)}</p>
@@ -225,22 +272,20 @@ $(document).ready(function (){
     });
 
     function lightModeStyle(){
-        console.log("switch to light mode");
-        header.css({
-            "backgroundColor":"white"
-        });
-        card.css({
-            "backgroundColor":"white"
-        });
+        header.removeClass("dark");
+        header.addClass("light");
+        for(let i = 0; i < card.length; i++){
+            card[i].style.backgroundColor = "#898686"
+            card[i].style.color = "#1a221f"
+        }
     }
     function darkModeStyle(){
-        console.log("switch to dark mode");
-        header.css({
-            "backgroundColor": "#1e0f0f"
-        });
-        card.css({
-            "backgroundColor":"#1e0f0f"
-        });
+        header.removeClass("light");
+        header.addClass("dark");
+        for(let i = 0; i < card.length; i++){
+            card[i].style.backgroundColor = "#1e0f0f"
+            card[i].style.color = "#4fb286"
+        }
     }
 
     $("#weatherDisplay").on("change", () => {
@@ -294,28 +339,24 @@ $(document).ready(function (){
 
 // NEED TO FINISH:
     /*
-    *  DARK MODE / LIGHT MODE COLORS
-    *  NAV STYLING AND LAYOUT IN NON MOBILE
     *  COULD MEMOIZE WITH A CACHE
     *
     *  HAVE THE HOURLY FORECAST START FROM THE CURRENT HOUR ON WARD ( GET DATE() AND COMPARE DT GET THAT INDEX AND RENDER FROM THERE ON )
-    *
-    *  CHANGE LOCATION BUTTON TO DISPLAY THE MAP, POSSIBLE FLIP CARDS ON HOVER
-    *
-    *  LARGER CURRENT WEATHER DISPLAYED
     *
     *  IF CURRENT TIME AFTER CURRENT SUNSET THEN NIGHT MODE (?)
     *
     * */
 
-    $("body").on("click", ".weatherCard", function (){
+    doc.on("mouseenter", ".weatherCard", function (){
         const currCard = $(this).children()[0];
         const classes = currCard.classList;
-        if(!classes.contains("flip")){
-            classes.add("flip");
-        } else {
-            classes.remove("flip");
-        }
+        classes.add("flip");
+    });
+
+    doc.on("mouseleave", ".weatherCard", function (){
+        const currCard = $(this).children()[0];
+        const classes = currCard.classList;
+        classes.remove("flip");
     });
 
     function getLocation(obj){
@@ -331,6 +372,7 @@ $(document).ready(function (){
                 weatherArea.style.color = "#4fb286";
                 break;
             case "Clouds":
+            case "Mist":
                 body.style.backgroundImage = "url('img/cloudy.jpg')";
                 weatherArea.style.color = "white";
                 $("#singleCurrCard").css("color", "black");
