@@ -255,6 +255,7 @@ button:hover{
     height: 215px;
     perspective: 1000px;
     box-shadow: -3px 2px 1px 0 rgba(0,0,0,0.1);
+    background-color: #1e0f0f;
 }
 .flip-card-inner {
     position: relative;
@@ -301,10 +302,13 @@ button:hover{
     width: 50%;
 }
 #threeHourTime{
-
+    border: 1px solid #1f1f1f;
+    border-radius: 15px;
+    width: 60px;
+    text-align: center;
 }
 #threeHourTemp{
-
+    font-size: 18px;
 }
 
 @media screen and (min-width: 768px){

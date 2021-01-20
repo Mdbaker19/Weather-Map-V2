@@ -9,15 +9,31 @@ $(document).ready(function (){
     }
     const clockTime = (unix) =>{
         let date = new Date(unix * 1000);
-        let hours;
-        if(twelveHR) {
-            hours = date.getHours() % 12;
-        } else {
-            hours = date.getHours();
-        }
+        let hours = date.getHours();
         let minutes = "0" + date.getMinutes();
         let seconds = "0" + date.getSeconds();
-        return `${hours} : ${minutes.substr(-2)} : ${seconds.substr(-2)}`;
+        if(twelveHR && hours > 12) {
+            hours = date.getHours() - 12;
+            return `${hours} : ${minutes.substr(-2)} : ${seconds.substr(-2)} p.m.`;
+        } else {
+            hours = date.getHours();
+            return `${hours} : ${minutes.substr(-2)} : ${seconds.substr(-2)}`;
+        }
+    }
+    const weatherTime = (unix) =>{
+        let date = new Date(unix * 1000);
+        let hours = date.getHours();
+        if(twelveHR && hours > 12){
+            hours = date.getHours() - 12;
+            hours += " pm";
+        }else if(hours === 0 && !twelveHR){
+            hours = "24 : 00";
+        } else if(hours === 0 && twelveHR){
+            hours = "12 : 00";
+        } else {
+            hours += " : 00";
+        }
+        return `${hours}`
     }
     const weekDay = (unix) =>{
         let d = new Date(unix * 1000);
@@ -73,13 +89,8 @@ $(document).ready(function (){
             twelveHR = false;
         }
         $("#time").text(clockTime(cache.current.dt + cache.timezone_offset + baseOffset));
-        $("#fullOnly3Hour").html(everyThreeHours(cache.hourly, currentHour));
+        $("#fullOnly3Hour").html(everyThreeHours(cache.hourly));
     });
-
-    const currTime = new Date();
-    const it = currTime.getTime()
-    // console.log(currTime.toLocaleTimeString()); // 736pm
-    // console.log(currTime.toString().substring(0, 24));
 
     function getWeather(lng, lat){
         fetch(`https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lng}&exclude=minutely&units=imperial&appid=${openWeatherApi}`).then( r => {
@@ -109,7 +120,7 @@ $(document).ready(function (){
 
     function threeHourTempRender(obj){
         return `<div id="threeHour">
-                    <p class="three" id="threeHourTime">${clockTime(obj.dt).substring(0, 7)}  </p>
+                    <p class="three dark smallWeather" id="threeHourTime">${weatherTime(obj.dt).substring(0, 7)}  </p>
                     <p class="three" id="threeHourTemp">${obj.temp} ˚</p>
                 </div>`
     }
@@ -268,6 +279,8 @@ $(document).ready(function (){
             card[i].style.backgroundColor = "#898686"
             card[i].style.color = "#1a221f"
         }
+        $(".smallWeather").removeClass("dark");
+        $(".smallWeather").addClass("light");
     }
     function darkModeStyle(){
         header.removeClass("light");
@@ -276,6 +289,8 @@ $(document).ready(function (){
             card[i].style.backgroundColor = "#1e0f0f"
             card[i].style.color = "#4fb286"
         }
+        $(".smallWeather").addClass("dark");
+        $(".smallWeather").removeClass("light");
     }
 
     function callSearch(input){
